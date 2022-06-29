@@ -27,7 +27,8 @@ case $BRANCH in
 	;;
 
         current)
-                KERNELBRANCH='branch:linux-5.9.y'
+		KERNELSOURCE='https://github.com/a520ass/Amlogic_s905-kernel'
+		KERNELBRANCH='branch:v590'
                 KERNELPATCHDIR='meson64-current'
         ;;
 
