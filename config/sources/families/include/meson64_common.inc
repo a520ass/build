@@ -35,8 +35,8 @@ case $BRANCH in
         ;;
 
         edge)
-		KERNELBRANCH='branch:linux-5.17.y'
-		KERNELPATCHDIR='meson64-edge'
+		KERNELSOURCE='https://github.com/unifreq/linux-5.15.y'
+		KERNELBRANCH='branch:main'
         ;;
 
 esac
