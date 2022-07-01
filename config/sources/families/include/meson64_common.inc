@@ -35,8 +35,8 @@ case $BRANCH in
         ;;
 
         edge)
-		KERNELSOURCE='https://github.com/unifreq/linux-5.15.y'
-		KERNELBRANCH='branch:main'
+		KERNELBRANCH='branch:linux-5.17.y'
+		KERNELPATCHDIR='meson64-edge'
         ;;
 
 esac
@@ -265,7 +265,7 @@ family_tweaks_bsp()
 
 	mkdir -p "$destination"/etc/X11/xorg.conf.d
 	case "${BOARD}" in
-		"odroidc2" | "nanopik2-s905" | "lepotato" | "lafrite" | "khadas-vim1" | "khadas-vim2" )
+		"odroidc2" | "nanopik2-s905" | "lepotato" | "phicomm-n1" | "lafrite" | "khadas-vim1" | "khadas-vim2" )
 	cat <<-EOF > "$destination"/etc/X11/xorg.conf.d/02-driver.conf
 	Section "OutputClass"
 	    Identifier "Amlogic"

@@ -18,7 +18,7 @@ setenv INITRD "uInitrd"
 setenv LINUX "Image"
 setenv devnum 1
 setenv devtype "mmc"
-setenv prefix "/boot/"
+setenv prefix "/"
 
 if test -e usb 0 /u-boot.ext; then
     setenv devnum 0
