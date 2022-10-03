@@ -124,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1.11.0
         if: ${{ github.repository_owner == 'Armbian' && github.event.inputs.choice != 'stable'  && github.event.inputs.choice != 'rc' }}
         with:
           artifacts: "LICENSE"
@@ -313,7 +313,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
-      - uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1.11.0
         with:
           tag: "latest"
           bodyFile: ".github/Releases.md"
