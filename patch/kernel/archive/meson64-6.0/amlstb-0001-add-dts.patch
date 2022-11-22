@@ -8,9 +8,9 @@ index ced039463..58e79f81e 100644
 +dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905l2-e900v21e.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905l3-b860av21u.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-g12a-s905l3a-e900v22d.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-a1-ad401.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-axg-jethome-jethub-j100.dtb
  dtb-$(CONFIG_ARCH_MESON) += meson-axg-s400.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-g12a-sei510.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-g12a-u200.dtb
 diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-s905l3a-e900v22d.dts b/arch/arm64/boot/dts/amlogic/meson-g12a-s905l3a-e900v22d.dts
 new file mode 100644
 index 000000000..c5d50cff7
