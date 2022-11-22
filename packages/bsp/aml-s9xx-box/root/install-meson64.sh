@@ -2,61 +2,42 @@
 
 echo "Start script create MBR and filesystem"
 
-hasdrives=$(lsblk | grep -oE '(mmcblk[0-9])' | sort | uniq)
-if [ "$hasdrives" = "" ]
-then
-	echo "UNABLE TO FIND ANY EMMC OR SD DRIVES ON THIS SYSTEM!!! "
-	exit 1
-fi
-avail=$(lsblk | grep -oE '(mmcblk[0-9]|sda[0-9])' | sort | uniq)
-if [ "$avail" = "" ]
-then
-	echo "UNABLE TO FIND ANY DRIVES ON THIS SYSTEM!!!"
-	exit 1
+# Check the current system running disk
+root_devname="$(df / | tail -n1 | awk '{print $1}' | awk -F '/' '{print substr($3, 1, length($3)-2)}')"
+if lsblk -l | grep -E "^${root_devname}boot0" >/dev/null; then
+    echo "you are running in emmc mode, please boot system with usb or tf card!"
+    exit 1
 fi
 
-#unmount /var/log.hdd so logic below can find the root partition
-umount /var/log.hdd
-
-runfrom=$(lsblk | grep /$ | grep -oE '(mmcblk[0-9]|sda[0-9])')
-if [ "$runfrom" = "" ]
-then
-	echo " UNABLE TO FIND ROOT OF THE RUNNING SYSTEM!!! "
-	exit 1
+# Find emmc disk, first find emmc containing boot0 partition
+install_emmc="$(lsblk -l -o NAME | grep -oE '(mmcblk[0-9]?boot0)' | sed "s/boot0//g")"
+# Find emmc disk, find emmc that does not contain the boot0 partition
+if [ -z "${install_emmc}" ]; then 
+ install_emmc="$(lsblk -l -o NAME | grep -oE '(mmcblk[0-9]?)' | grep -vE ^${root_devname} | uniq)"
 fi
-emmc=$(echo $avail | sed "s/$runfrom//" | sed "s/sd[a-z][0-9]//g" | sed "s/ //g")
-if [ "$emmc" = "" ]
-then
-	echo " UNABLE TO FIND YOUR EMMC DRIVE OR YOU ALREADY RUN FROM EMMC!!!"
-	exit 1
+# Check if emmc exists
+if [ -z "${install_emmc}" ]; then 
+ echo "No emmc can be found to install the armbian system!"
+ exit 1
 fi
-if [ "$runfrom" = "$avail" ]
-then
-	echo " YOU ARE RUNNING ALREADY FROM EMMC!!! "
-	exit 1
-fi
-if [ $runfrom = $emmc ]
-then
-	echo " YOU ARE RUNNING ALREADY FROM EMMC!!! "
-	exit 1
-fi
-if [ "$(echo $emmc | grep mmcblk)" = "" ]
-then
-	echo " YOU DO NOT APPEAR TO HAVE AN EMMC DRIVE!!! "
-	exit 1
-fi
-
-DEV_EMMC="/dev/$emmc"
-
-echo $DEV_EMMC
+# Location of emmc
+DEV_EMMC="/dev/${install_emmc}"
+echo "DEV_EMMC: [ ${DEV_EMMC} ]"
 
 echo "Start backup u-boot default"
-dd if="${DEV_EMMC}" of=/root/u-boot-default-aml-s905.img bs=1M count=4
 
-if [ -f /root/u-boot/u-boot-s905/u-boot.img ] ; then
-    echo "Start install u-boot to eMMC"
-    dd if=/root/u-boot/u-boot-s905/u-boot.img of="${DEV_EMMC}"
-fi
+dd if="${DEV_EMMC}" of=/root/u-boot-default-aml.img bs=1M count=4
+
+echo "Start create MBR and partittion"
+
+parted -s "${DEV_EMMC}" mklabel msdos
+parted -s "${DEV_EMMC}" mkpart primary fat32 700M 1212M
+parted -s "${DEV_EMMC}" mkpart primary ext4 1213M 100%
+
+echo "Start restore u-boot"
+
+dd if=/root/u-boot-default-aml.img of="${DEV_EMMC}" conv=fsync bs=1 count=442
+dd if=/root/u-boot-default-aml.img of="${DEV_EMMC}" conv=fsync bs=512 skip=1 seek=1
 
 sync
 
@@ -90,17 +71,13 @@ echo -n "Copying BOOT..."
 cp -r /boot/* $DIR_INSTALL && sync
 echo "done."
 
-echo -n "Edit init config..."
-sed -e "s/\(root=UUID\)\([[:graph:]]\)*/root=LABEL=ROOT_EMMC/gi" \
- -i "$DIR_INSTALL/extlinux/extlinux.conf"
-echo "done."
-
-#rm $DIR_INSTALL/s9*
+rm $DIR_INSTALL/s9*
 rm $DIR_INSTALL/aml*
-rm $DIR_INSTALL/boot.ini
-#mv -f $DIR_INSTALL/s905_emmc_autoscript $DIR_INSTALL/s905_autoscript
 
-umount $DIR_INSTALL
+if [ -f /boot/u-boot.ext ] ; then
+    mv -f $DIR_INSTALL/u-boot.ext $DIR_INSTALL/u-boot.emmc
+    sync
+fi
 
 if grep -q $PART_ROOT /proc/mounts ; then
     echo "Unmounting ROOT partiton."
@@ -111,6 +88,16 @@ echo "Formatting ROOT partition..."
 mke2fs -F -q -t ext4 -L ROOT_EMMC -m 0 $PART_ROOT
 e2fsck -n $PART_ROOT
 echo "done."
+
+UUID=`blkid -s UUID $PART_ROOT | awk -F "\"" '{print $2}'`
+echo "ROOT_EMMC UUID:${UUID}"
+echo -n "Edit armbianEnv config..."
+sed -i 's/rootdev=UUID=.*$/rootdev=UUID='"$UUID"'/g' "$DIR_INSTALL/armbianEnv.txt"
+sed -i '/usbstoragequirks/d' "$DIR_INSTALL/armbianEnv.txt"
+echo "done."
+
+umount $DIR_INSTALL
+
 
 echo "Copying ROOTFS."
 
@@ -166,10 +153,10 @@ sync
 echo "Copy fstab"
 
 rm $DIR_INSTALL/etc/fstab
-cp -a /root/fstab.template $DIR_INSTALL/etc/fstab
+cp -a /root/fstab $DIR_INSTALL/etc/fstab
 
 rm $DIR_INSTALL/root/install*.sh
-rm $DIR_INSTALL/root/fstab.template
+rm $DIR_INSTALL/root/fstab
 rm $DIR_INSTALL/usr/bin/ddbr
 
 
