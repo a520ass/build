@@ -29,8 +29,9 @@ case $BRANCH in
 		;;
 
 	edge)
-		KERNELSOURCE='https://github.com/chewitt/linux'
-		KERNELBRANCH='branch:amlogic-6.0.y'
+		#KERNELSOURCE='https://github.com/chewitt/linux'
+		#KERNELBRANCH='branch:amlogic-6.0.y'
+		KERNELBRANCH='branch:linux-6.0.y'
 		KERNELPATCHDIR='meson64-edge'
 		;;
 
