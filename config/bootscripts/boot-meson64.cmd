@@ -15,6 +15,23 @@ setenv bootlogo "false"
 setenv rootfstype "ext4"
 setenv docker_optimizations "on"
 
+setenv devnum 1
+setenv devtype "mmc"
+setenv prefix "/"
+
+if test -e mmc 2 /u-boot.emmc; then
+    setenv devnum 2
+    setenv devtype "mmc"
+    setenv prefix "/"
+fi
+
+usb start
+if test -e usb 0 /u-boot.ext; then
+    setenv devnum 0
+    setenv devtype "usb"
+    setenv prefix "/"
+fi
+
 # odroid c4 legacy kernel values from boot.ini
 
 setenv dtb_loadaddr "0x1000000"
