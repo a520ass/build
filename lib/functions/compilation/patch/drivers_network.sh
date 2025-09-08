@@ -38,7 +38,7 @@ driver_rtl8189ES() {
 	if linux-version compare "${version}" ge 3.14 && [ "$EXTRAWIFI" == yes ]; then
 
 		# attach to specifics tag or branch
-		local rtl8189esver="branch:master"
+		local rtl8189esver="commit:75a566a830037c7d1309c5a9fe411562772a1cf2"
 
 		display_alert "Adding" "Wireless drivers for Realtek 8189ES chipsets ${rtl8189esver}" "info"
 
@@ -82,7 +82,7 @@ driver_rtl8189FS() {
 	if linux-version compare "${version}" ge 3.14 && [ "$EXTRAWIFI" == yes ]; then
 
 		# attach to specifics tag or branch
-		local rtl8189fsver="branch:rtl8189fs"
+		local rtl8189fsver="commit:75a566a830037c7d1309c5a9fe411562772a1cf2"
 
 		display_alert "Adding" "Wireless drivers for Realtek 8189FS chipsets ${rtl8189fsver}" "info"
 
