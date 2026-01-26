@@ -40,7 +40,7 @@ case $BRANCH in
 		;;
 	edge)
 		declare -g KERNEL_MAJOR_MINOR="6.18"
-		declare -g KERNELBRANCH="tag:v6.18.0"
+		declare -g KERNELBRANCH="tag:v6.18"
 		;;
 
 esac
